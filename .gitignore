@@ -1,0 +1,34 @@
+# nginx.conf
+frontend/nginx.conf
+
+# Секреты
+.env
+.env.local
+
+# Зависимости
+node_modules/
+npm-debug.log*
+yarn-error.log*
+yarn-debug.log*
+
+# Docker
+.dockerignore
+docker-compose.yml
+
+# Логи и бэкапы
+logs/
+*.log
+db/backups/
+certs/
+backups/
+scripts/backup-db.sh
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

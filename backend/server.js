@@ -33,6 +33,8 @@ async function checkDB(retries = 10) {
     throw new Error('Не удалось подключиться к PostgreSQL')
 }
 
+// Для парсинга body из JSON
+app.use(express.json())
 
 // ПУБЛИЧНЫЕ СТРАНИЦЫ (БЕЗ АВТОРИЗАЦИИ)
 app.get(['/', '/index.html'], (req, res) => {
@@ -43,6 +45,10 @@ app.get(['/', '/index.html'], (req, res) => {
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok!', timestamp: new Date().toISOString() })
 })
+
+// === Подключение API обновления ===
+const UpdateAPI = require('./middleware/update')
+UpdateAPI(app, dbConfig)
 
 
 // === Запуск сервера только после проверки БД ===

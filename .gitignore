@@ -32,3 +32,6 @@ scripts/backup-db.sh
 # OS
 .DS_Store
 Thumbs.db
+
+# Файлы
+install/

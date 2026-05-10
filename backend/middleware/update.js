@@ -30,43 +30,47 @@ const auth_api = (dbConfig) => {
 
 // Маршруты бэкенда системы обновления
 module.exports = (app, dbConfig) => {
-    // Получение информации о поставке WB для старых отчетов Power BI
+    // Получение доступных обновлений на основе конфигов, прилетевших от клиента
     app.post('/api/check_updates', auth_api(dbConfig), async (req, res) => {
-        console.log('PAYLOAD: ' + JSON.stringify(req.body))
+        const { AppsInfo } = req.body
 
-        res.json({
-            message: "ok!"
-        })
+        const baseURL = `https://${req.get('host')}`
 
-        /*const { seller_id, date_from } = req.body
-
-        // Строки поставок (только в статусах "Идёт приемка" и "Принято")
-        const incomesQuery = `
-            SELECT s.supplyid AS "incomeId", '' AS number, s.supplydate AS date, s.updateddate AS "lastChangeDate",
-                sg.vendorcode AS "supplierArticle", sg.techsize AS "techSize", sg.barcode, sg.acceptedquantity AS quantity,
-                0 AS "totalPrice", s.factdate AS "dateClose", sd.warehousename AS "warehouseName", sg.nmid, ss.name AS status
-            FROM wb.supplies s
-                INNER JOIN wb.supplies_goods sg ON s.seller_id = sg.seller_id AND s.supplyid = sg.supplyid
-                INNER JOIN wb.supplies_details sd ON s.seller_id = sd.seller_id AND s.supplyid = sd.supplyid
-                INNER JOIN wb.supplies_statuses ss ON s.statusid = ss.id
-            WHERE s.seller_id = $1::uuid AND s.updateddate >= $2::date AND s.statusid IN (4,5)
-            ORDER BY s.supplydate DESC
+        // Названия приложений и ссылки на скрипт установки
+        const updateAppsQuery = `
+            WITH user_apps AS (
+                SELECT 
+                    (app->>'AppName') AS app_name,
+                    CASE 
+                        WHEN app->>'Settings' = '{}' THEN NULL
+                        ELSE (app->>'Settings')::jsonb->>'version'
+                    END AS version_from_json
+                FROM jsonb_array_elements($1::jsonb) AS app
+            )
+            SELECT 
+                ua.app_name AS "appName",
+                CONCAT($2::text, i.install_script_path) AS "installScriptPath"
+            FROM public.install i
+            JOIN user_apps ua ON i.app_name = ua.app_name
+            WHERE 
+                ua.version_from_json IS NULL 
+                OR i.actual_ver > ua.version_from_json::int;
         `	
         Promise.all([
-            dbConfig.query(incomesQuery, [seller_id, date_from])
+            dbConfig.query(updateAppsQuery, [JSON.stringify(AppsInfo), baseURL])
         ])
-        .then(([incRes]) => {
-            const rows = incRes.rows || []
+        .then(([updRes]) => {
+            const rows = updRes.rows || []
 
-            audit.log(ENTITY_KIND_OK, 'get_wb_incomes_for_pbi', ENTITY_TYPE_PRINT_SERVICE, PRINT_WB, { seller_id, date_from }, req)
+            console.log(JSON.stringify(rows))
+
             res.json({
                 rows
             })
         })
         .catch(err => {
-            audit.log(ENTITY_KIND_ERROR, 'get_wb_incomes_for_pbi', ENTITY_TYPE_PRINT_SERVICE, PRINT_WB, { seller_id, date_from, err }, req)
-            console.error(`WB print: Ошибка при получении поставок для старой отчетности`, err)
-            res.status(500).json({status: -1, error: 'Не удалось загрузить данные поставок для старой отчетности' })
-        })    */     
+            console.error(`Ошибка при получении списка приложений для обновления`, err)
+            res.status(500).json({status: -1, error: 'Не удалось получить список приложений для обновления' })
+        })
     })
 }

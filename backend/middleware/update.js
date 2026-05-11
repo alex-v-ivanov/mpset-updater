@@ -34,7 +34,7 @@ module.exports = (app, dbConfig) => {
     app.post('/api/check_updates', auth_api(dbConfig), async (req, res) => {
         const { AppsInfo } = req.body
 
-        const baseURL = `https://${req.get('host')}`
+        const baseURL = `https://${req.get('host')}/`
 
         // Названия приложений и ссылки на скрипт установки
         const updateAppsQuery = `

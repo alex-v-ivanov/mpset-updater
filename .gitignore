@@ -35,3 +35,34 @@ Thumbs.db
 
 # Файлы
 install/
+FF/FFPrintService/.vs/
+Seller/.vs/
+Seller/packages/
+Seller/Seller/bin/
+Seller/Seller/obj/
+Seller/obj/
+Seller/Loader/bin/
+Seller/Loader/obj/
+Seller/Uploader/bin/
+Seller/Uploader/obj/
+BTAutoPrint/bin/
+BTAutoPrint/publish/
+FF/server/.env
+FF/server/node_modules/
+BTAutoPrint/bin/
+BTAutoPrint/obj/
+BTAutoPrint/.vs/
+ffs/node_modules/
+Python/errors/
+creds.txt
+FF/FFPrintService/bin/
+FF/FFPrintService/obj/
+FF/FFPrintService/packages/
+MPSET/MPSETUpdater/bin/
+MPSET/MPSETUpdater/obj/
+MPSET/MPSETUpdater/.vs/
+MPSET/MPSETUpdater/publish/
+MPSET/**/*.zip
+MPSET/**/*.exe
+**/*.env
+>>>>>>> 1d5b5d2da5472ac7fcc33421002a549ef174ccd9

@@ -46,6 +46,36 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok!', timestamp: new Date().toISOString() })
 })
 
+// === Отдача CRX-файла плагина для браузера для принудительной установки ===
+app.get('/install/plugin/mpsetpro.crx', (req, res) => {
+    const crxPath = path.join(__dirname, '../install/plugin', 'mpsetpro.crx')
+    
+    res.sendFile(crxPath, {
+        headers: {
+            'Content-Type': 'application/x-chrome-extension'
+        }
+    }, (err) => {
+        if (err) {
+            console.error('Ошибка отдачи crx:', err)
+            res.status(500).end()
+        }
+    })
+})
+
+// === Отдача Update Manifest (XML) ===
+app.get('/install/plugin/mpsetpro_upd.xml', (req, res) => {
+    const xmlPath = path.join(__dirname, '../install/plugin', 'mpsetpro_upd.xml')
+    
+    // Для XML ставим правильный тип
+    res.set('Content-Type', 'application/xml')
+    res.sendFile(xmlPath, (err) => {
+        if (err) {
+            console.error('Ошибка отдачи xml:', err)
+            res.status(500).end()
+        }
+    })
+})
+
 // === Подключение API обновления ===
 const UpdateAPI = require('./middleware/update')
 UpdateAPI(app, dbConfig)

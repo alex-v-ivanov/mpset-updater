@@ -34,17 +34,16 @@ module.exports = (app, dbConfig) => {
     app.post('/api/check_updates', auth_api(dbConfig), async (req, res) => {
         const { AppsInfo } = req.body
 
+        console.log(`Прилетел запрос на обновление:\n${JSON.stringify(AppsInfo)}`)
+
         const baseURL = `https://${req.get('host')}/`
 
         // Названия приложений и ссылки на скрипт установки
         const updateAppsQuery = `
             WITH user_apps AS (
                 SELECT 
-                    (app->>'AppName') AS app_name,
-                    CASE 
-                        WHEN app->>'Settings' = '{}' THEN NULL
-                        ELSE (app->>'Settings')::jsonb->>'version'
-                    END AS version_from_json
+                    (app->>'Name') AS app_name,
+                    (app->>'Version')::int AS version_from_json
                 FROM jsonb_array_elements($1::jsonb) AS app
             )
             SELECT 
@@ -52,9 +51,7 @@ module.exports = (app, dbConfig) => {
                 CONCAT($2::text, i.install_script_path) AS "installScriptPath"
             FROM public.install i
             JOIN user_apps ua ON i.app_name = ua.app_name
-            WHERE 
-                ua.version_from_json IS NULL 
-                OR i.actual_ver > ua.version_from_json::int;
+            WHERE i.actual_ver > ua.version_from_json
         `	
         Promise.all([
             dbConfig.query(updateAppsQuery, [JSON.stringify(AppsInfo), baseURL])

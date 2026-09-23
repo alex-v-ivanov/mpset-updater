@@ -1,0 +1,13 @@
+FROM node:24
+
+WORKDIR /app
+
+# Копируем зависимости
+COPY package*.json ./
+RUN npm install --production
+
+# Копируем код
+COPY . .
+
+# Запускаем упрощенную инициализацию
+CMD ["node", "workers/worker.js"]
